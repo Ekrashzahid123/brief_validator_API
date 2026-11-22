@@ -116,11 +116,18 @@ All 12 test scenarios will execute, verifying:
 ## Interactive Testing via Swagger UI
 
 1. Open `http://127.0.0.1:8000/docs` in your browser.
-2. Expand `GET /sample` and click **Try it out** -> **Execute** to inspect the `VAL-001` test case.
-3. Expand `POST /validate` and click **Try it out**.
-4. Paste the sample brief JSON into the Request Body and click **Execute**.
-5. Observe the generated package, score `100`, and `PASS` status.
-6. To test a failure scenario:
+2. **Explore Sample Briefs**:
+   - `GET /sample`: Returns default sample `VAL-001`. You can pass `case_id` query parameter (`VAL-001`, `VAL-002`, `VAL-003`, `VAL-004`).
+   - `GET /samples`: Returns all 4 synthetic sample briefs across different industry domains.
+3. **Synthetic Sample Library**:
+   - `VAL-001`: **AI Customer Support Assistant** (Knowledge Base RAG, $5,000, 4 weeks)
+   - `VAL-002`: **Intelligent Invoice Extraction & Reconciliation System** (FinTech OCR & ERP matching, $12,000, 6 weeks)
+   - `VAL-003`: **E-Commerce Real-Time Personalization & Search Engine** (Retail vector search & ranking, $18,000, 8 weeks)
+   - `VAL-004`: **Clinical Note Summarization & Triage Assistant** (Healthcare NLP & FHIR compliance, $25,000, 10 weeks)
+4. Expand `POST /validate` and click **Try it out**.
+5. Paste any of the sample brief JSON objects into the Request Body and click **Execute**.
+6. Observe the generated package, score `100`, and `PASS` status.
+7. To test a failure scenario:
    - Provide an empty string for `"project_title": ""` to see HTTP 422 schema validation error.
    - Or set the header `x-simulate-loss: true` to observe the validation engine detect a missing requirement and return status `FAIL` with a reduced score.
 

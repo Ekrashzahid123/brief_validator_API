@@ -7,11 +7,17 @@ for _d in (str(_PROJECT_DIR), str(_APP_DIR)):
     if _d not in sys.path:
         sys.path.insert(0, _d)
 
-from fastapi import FastAPI, Header, status
+from typing import List
+from fastapi import FastAPI, Header, HTTPException, Query, status
 
 try:
     from app.package_generator import generate_package
-    from app.sample_data import SAMPLE_BRIEF_DATA
+    from app.sample_data import (
+        SAMPLE_BRIEF_DATA,
+        SAMPLE_CASES,
+        get_all_sample_briefs,
+        get_sample_brief,
+    )
     from app.schemas import (
         HealthResponse,
         ProjectBrief,
@@ -21,7 +27,12 @@ try:
     from app.validator import validate_brief_and_package
 except ImportError:
     from package_generator import generate_package
-    from sample_data import SAMPLE_BRIEF_DATA
+    from sample_data import (
+        SAMPLE_BRIEF_DATA,
+        SAMPLE_CASES,
+        get_all_sample_briefs,
+        get_sample_brief,
+    )
     from schemas import (
         HealthResponse,
         ProjectBrief,
@@ -69,12 +80,34 @@ def health_check() -> HealthResponse:
     status_code=status.HTTP_200_OK,
     summary="Get Synthetic Sample Brief",
 )
-def get_sample() -> ProjectBrief:
+def get_sample(
+    case_id: str = Query(
+        default="VAL-001",
+        description="Case ID of the synthetic sample brief (VAL-001, VAL-002, VAL-003, VAL-004)",
+    )
+) -> ProjectBrief:
     """
-    Return a pre-configured synthetic sample project brief (VAL-001)
-    ready for immediate validation testing.
+    Return a pre-configured synthetic sample project brief ready for validation testing.
+    Defaults to VAL-001. Other available cases: VAL-002, VAL-003, VAL-004.
     """
-    return ProjectBrief(**SAMPLE_BRIEF_DATA)
+    if case_id not in SAMPLE_CASES:
+        available = list(SAMPLE_CASES.keys())
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Sample case '{case_id}' not found. Available cases: {available}",
+        )
+    return get_sample_brief(case_id)
+
+
+@app.get(
+    "/samples",
+    response_model=List[ProjectBrief],
+    status_code=status.HTTP_200_OK,
+    summary="List All Synthetic Sample Briefs",
+)
+def get_all_samples() -> List[ProjectBrief]:
+    """Return all available pre-configured synthetic sample project briefs."""
+    return get_all_sample_briefs()
 
 
 @app.post(
